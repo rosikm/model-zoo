@@ -37,6 +37,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#070707;color:#edeae4;
 #warn{right:8px}
 #audio-status{left:8px;right:8px;color:#8c8880;pointer-events:none}
 #audio-status.error{color:#d23b3b}
+#test-btn{position:absolute;right:8px;bottom:24px;padding:.5rem .9rem;font:14px "Helvetica Neue",Helvetica,Arial,sans-serif;color:#dedbd5;background:#292928;border:1px solid #b8b4ac;border-radius:6px;z-index:5}
 @media(max-width:600px){
   #detail{overflow:auto}
   #cols{flex-wrap:wrap;flex:none}
@@ -55,6 +56,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#070707;color:#edeae4;
       <section class="col" id="see" aria-label="What you see"></section><section class="col" id="feel" aria-label="What you feel"></section></div></div>
   <div id="warn"></div>
   <div id="audio-status" role="status" aria-live="polite"></div>
+  <button id="test-btn" type="button">Test: single file 3694</button>
 </main>
 <script src="data.js"></script>
 <script>
@@ -266,6 +268,24 @@ function narrate(id){
   request.send();
 }
 
+/* ---------- test: one pre-mixed file (3694) through the native audio player ---------- */
+var testAudio=null;
+function stopTest(){
+  if(testAudio){testAudio.pause();testAudio.onended=null;testAudio.onerror=null;testAudio=null}
+  $("test-btn").textContent="Test: single file 3694";
+}
+$("test-btn").addEventListener("click",function(){
+  if(testAudio){stopTest();audioStatus("",false);return}
+  if(scene){scene.stop();scene=null}
+  stopNarration();
+  testAudio=new Audio();
+  testAudio.onended=function(){stopTest();audioStatus("",false)};
+  testAudio.onerror=function(){stopTest();audioStatus("The test file could not be played.",true)};
+  testAudio.src=CONFIG.narrationDir+"test-3694"+CONFIG.narrationExt;
+  testAudio.play();
+  $("test-btn").textContent="Stop test";audioStatus("Playing single test file…",false);
+},false);
+
 /* ---------- selecting, idle reset ---------- */
 function mark(id){
   var i;for(i=0;i<CONFIG.order.length;i++){
@@ -273,7 +293,7 @@ function mark(id){
 }
 function select(id){
   var it=item(id),sc;
-  resetIdle();selected=id;mark(id);unlock();narrate(id);
+  stopTest();resetIdle();selected=id;mark(id);unlock();narrate(id);
   $("idle").style.display="none";$("detail").style.display="flex";
   $("num").textContent=id;
   fillText(it);drawFrames(it);
