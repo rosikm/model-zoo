@@ -68,7 +68,7 @@ var CONFIG={
   // Opening centre X, centre Y and model diameter in cm, from the lid's top-left.
   openings:[[17,17,12],[42.625,17,15],[75.625,17,15],
     [24.375,40,15],[57.375,40,15],[83,40,12],[40.875,63,15],[66.5,63,12]],
-  narrationDir:"narration/", mixPrefix:"mix-", narrationExt:".mp3",
+  narrationDir:"narration/", mixPrefix:"mix-", mixVersion:"2", narrationExt:".mp3",
   idleSeconds:120                           // back to the start screen after this many seconds without a tap
 };
 var EMO=["amusement","awe","contentment","excitement","anger","disgust","fear","sadness"];
@@ -147,7 +147,7 @@ var idleT=0,player=null,playUrls={},playRequest=null,playToken=0,directFails=fal
 function audioStatus(message,error){
   $("audio-status").textContent=message;$("audio-status").className=error?"error":"";
 }
-function mixUrl(id){return CONFIG.narrationDir+CONFIG.mixPrefix+id+CONFIG.narrationExt}
+function mixUrl(id){return CONFIG.narrationDir+CONFIG.mixPrefix+id+CONFIG.narrationExt+"?v="+CONFIG.mixVersion}
 function stopPlayback(){
   playToken++;
   if(playRequest){var request=playRequest;playRequest=null;request.abort()}
