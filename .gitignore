@@ -2,6 +2,7 @@
 !/.gitignore
 !/.nojekyll
 !/index.html
+!/index2.html
 !/data.js
 !/Newsreader.ttf
 !/Newsreader-OFL.txt
@@ -15,4 +16,4 @@
 !/narration/3858.mp3
 !/narration/3908.mp3
 !/narration/3932.mp3
-!/narration/test-3694.mp3
+!/narration/mix-*.mp3
