@@ -59,9 +59,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 /* ---------- settings you may change ---------- */
 var CONFIG={
   order:["3694","3767","3751","3858","3932","3616","3759","3908"],
-  // Opening x, y and diameter in the landscape design's 1086 x 493 selector.
-  openings:[[126,122,78],[307,109,104],[559,109,104],[811,109,104],
-    [288,281,104],[494,293,80],[629,293,80],[764,293,80]],
+  // Saved box model: 50% prints, 2 cm panels, 1.5 cm lid, prints on the back panel.
+  lidSize:[100,80],
+  // Opening centre X, centre Y and model diameter in cm, from the lid's top-left.
+  openings:[[17,17,12],[42.625,17,15],[75.625,17,15],
+    [24.375,40,15],[57.375,40,15],[83,40,12],[40.875,63,15],[66.5,63,12]],
   narrationDir:"narration/", narrationExt:".mp3",
   idleSeconds:120                           // back to the start screen after this many seconds without a tap
 };
@@ -87,17 +89,17 @@ function buildHoles(){
   }
 }
 function layout(){
-  var top=$("top"),W=top.clientWidth,H=top.clientHeight,k=Math.min(W/1366,H/493),i,p;
+  var top=$("top"),W=top.clientWidth,H=top.clientHeight,k=.9*Math.min(W/CONFIG.lidSize[0],H/CONFIG.lidSize[1]),i,p;
   document.documentElement.style.setProperty("--unit",Math.max(.6,Math.min(window.innerWidth/1366,window.innerHeight/1024))+"px");
-  var lid=$("lid");lid.style.width=1086*k+"px";lid.style.height=493*k+"px";
-  lid.style.left=(W-1086*k)/2+"px";lid.style.top=(H-493*k)/2+"px";
+  var lid=$("lid");lid.style.width=CONFIG.lidSize[0]*k+"px";lid.style.height=CONFIG.lidSize[1]*k+"px";
+  lid.style.left=(W-CONFIG.lidSize[0]*k)/2+"px";lid.style.top=(H-CONFIG.lidSize[1]*k)/2+"px";
   for(i=0;i<CONFIG.order.length;i++){
     p=CONFIG.openings[i];
     holes[i].style.width=holes[i].style.height=p[2]*k+"px";
-    holes[i].style.left=p[0]*k+"px";holes[i].style.top=p[1]*k+"px";
-    labs[i].style.width=48*k+"px";labs[i].style.left=(p[0]+p[2]/2-24)*k+"px";
-    labs[i].style.top=(p[1]+p[2]+10)*k+"px";labs[i].style.fontSize=18*k+"px";
-    labs[i].style.letterSpacing=k+"px";
+    holes[i].style.left=(p[0]-p[2]/2)*k+"px";holes[i].style.top=(p[1]-p[2]/2)*k+"px";
+    labs[i].style.width=12*k+"px";labs[i].style.left=(p[0]-6)*k+"px";
+    labs[i].style.top=(p[1]+p[2]/2+1)*k+"px";labs[i].style.fontSize=Math.max(10,2*k)+"px";
+    labs[i].style.letterSpacing=.1*k+"px";
   }
 }
 
