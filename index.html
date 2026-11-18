@@ -269,20 +269,42 @@ function narrate(id){
 }
 
 /* ---------- test: one pre-mixed file (3694) through the native audio player ---------- */
-var testAudio=null;
+var testAudio=null,testUrl=null,testRequest=null;
 function stopTest(){
+  if(testRequest){testRequest.abort();testRequest=null}
   if(testAudio){testAudio.pause();testAudio.onended=null;testAudio.onerror=null;testAudio=null}
-  $("test-btn").textContent="Test: single file 3694";
+  if(testUrl&&window.URL&&URL.revokeObjectURL){URL.revokeObjectURL(testUrl)}
+  testUrl=null;$("test-btn").textContent="Test: single file 3694";
+}
+function testFail(a,step){
+  var code=a.error?a.error.code:"?";
+  stopTest();audioStatus("The test file could not be played ("+step+", error "+code+").",true);
 }
 $("test-btn").addEventListener("click",function(){
   if(testAudio){stopTest();audioStatus("",false);return}
   if(scene){scene.stop();scene=null}
   stopNarration();
-  testAudio=new Audio();
-  testAudio.onended=function(){stopTest();audioStatus("",false)};
-  testAudio.onerror=function(){stopTest();audioStatus("The test file could not be played.",true)};
-  testAudio.src=CONFIG.narrationDir+"test-3694"+CONFIG.narrationExt;
-  testAudio.play();
+  var a=new Audio(),url=CONFIG.narrationDir+"test-3694"+CONFIG.narrationExt;
+  testAudio=a;
+  a.onended=function(){stopTest();audioStatus("",false)};
+  // The server labels MP3 files audio/mp3, which iOS can reject, so retry from a downloaded audio/mpeg copy.
+  a.onerror=function(){
+    var req;
+    if(testAudio!==a)return;
+    a.onerror=function(){testFail(a,"downloaded copy")};
+    audioStatus("Retrying with a downloaded copy…",false);
+    req=new XMLHttpRequest();testRequest=req;req.open("GET",url+"?t="+new Date().getTime(),true);req.responseType="arraybuffer";
+    req.onload=function(){
+      testRequest=null;if(testAudio!==a)return;
+      if(req.status<200||req.status>=300||!window.URL||!URL.createObjectURL){testFail(a,"download HTTP "+req.status);return}
+      testUrl=URL.createObjectURL(new Blob([req.response],{type:"audio/mpeg"}));
+      a.src=testUrl;a.play();audioStatus("Playing single test file (downloaded copy)…",false);
+    };
+    req.onerror=function(){testRequest=null;testFail(a,"download")};
+    req.send();
+  };
+  a.src=url+"?t="+new Date().getTime();
+  a.play();
   $("test-btn").textContent="Stop test";audioStatus("Playing single test file…",false);
 },false);
 
