@@ -7,38 +7,42 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Prescriptive Art [Model ZOO]</title>
 <style>
-@font-face{font-family:"Newsreader";src:url("Newsreader.ttf") format("truetype");font-style:normal;font-weight:200 800;font-display:swap}
-:root{--bg:#070707;--panel:#0f0f0e;--line:#2a2a28;--text:#edeae4;--muted:#8c8880;--accent:#f0935a;--serif:"Newsreader",Georgia,"Times New Roman",serif;--sans:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;--unit:1px}
+@font-face{font-family:"Newsreader";src:url("Newsreader.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+html{font-size:16px;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--serif);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden;background:#070707;color:#edeae4;font-family:"Newsreader",Georgia,"Times New Roman",serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;touch-action:manipulation}
 #top{position:absolute;left:0;top:0;right:0;height:48.14453125%;overflow:hidden}
 #lid{position:absolute;background:#030303;border-radius:4px}
-.hole{position:absolute;padding:0;border:1.5px solid var(--line);border-radius:50%;background:#141413;cursor:pointer}
-.hole.on{border:3px solid var(--accent);background:#f0935a22}
-.hole:focus-visible{outline:2px solid var(--text);outline-offset:6px}
-.lab{position:absolute;text-align:center;font-family:var(--serif);font-weight:400;color:var(--muted);pointer-events:none}
-.lab.on{color:var(--accent)}
-#bottom{position:absolute;left:0;right:0;top:48.14453125%;bottom:0;background:var(--panel);box-shadow:inset 0 1px var(--line)}
-#idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:italic calc(26 * var(--unit)) var(--serif);color:var(--muted);text-align:center;padding:0 40px}
-#detail{position:absolute;inset:0;display:none;flex-direction:column;gap:calc(24 * var(--unit));padding:calc(32 * var(--unit)) calc(48 * var(--unit)) calc(48 * var(--unit))}
-#num{margin:0;font:400 calc(32 * var(--unit))/1 var(--serif)}
-#cols{display:flex;flex:1;min-height:0;gap:calc(48 * var(--unit))}
-#image{flex:0 0 calc(360 * var(--unit));min-width:0;overflow:hidden;background:#000;border:1px solid var(--line);border-radius:4px}
+.hole{position:absolute;padding:0;border:1.5px solid #2a2a28;border-radius:50%;background:#141413;cursor:pointer}
+.hole.on{border:3px solid #f0935a;background:rgba(240,147,90,.13)}
+.hole:focus-visible{outline:2px solid #edeae4;outline-offset:6px}
+.lab{position:absolute;text-align:center;font-weight:400;color:#8c8880;pointer-events:none}
+.lab.on{color:#f0935a}
+#bottom{position:absolute;left:0;right:0;top:48.14453125%;bottom:0;background:#0f0f0e;box-shadow:inset 0 1px #2a2a28}
+#idle{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;font:italic 1.625rem "Newsreader",Georgia,"Times New Roman",serif;color:#8c8880;text-align:center;padding:0 40px}
+#detail{position:absolute;top:0;right:0;bottom:0;left:0;display:none;flex-direction:column;padding:2rem 3rem 3rem}
+#num{margin:0 0 1.5rem;font:400 2rem/1 "Newsreader",Georgia,"Times New Roman",serif}
+#cols{display:flex;flex:1;min-height:0;width:100%}
+#image{flex:0 0 auto;width:22.5rem;min-width:0;overflow:hidden;background:#000;border:1px solid #2a2a28;border-radius:4px}
 #cv{display:block;width:100%;height:100%}
-.col{flex:1;min-width:0;overflow:auto}
-.col h2{margin:0 0 calc(16 * var(--unit));font:400 calc(20 * var(--unit))/1 var(--serif);color:var(--accent)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:calc(12 * var(--unit));padding:calc(12 * var(--unit)) 0;box-shadow:inset 0 -1px var(--line);font-size:calc(32 * var(--unit));line-height:1}
-.row+.row{margin-top:calc(16 * var(--unit))}
-.row span:first-child{min-width:0;overflow-wrap:break-word}
-.row span:last-child{font-size:calc(20 * var(--unit));white-space:nowrap}
+.col{flex:1;min-width:0;width:0;overflow:auto;margin-left:3rem}
+.col h2{margin:0 0 1rem;font:400 1.25rem/1 "Newsreader",Georgia,"Times New Roman",serif;color:#f0935a}
+.row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;box-shadow:inset 0 -1px #2a2a28;font-size:2rem;line-height:1}
+.row+.row{margin-top:1rem}
+.row span:first-child{min-width:0;word-wrap:break-word;overflow-wrap:break-word}
+.row span:last-child{font-size:1.25rem;white-space:nowrap;flex-shrink:0;margin-left:.75rem}
 .nm{text-transform:capitalize}
-.nothing{font:italic calc(22 * var(--unit)) var(--serif);color:var(--muted)}
-#warn{position:absolute;right:8px;bottom:4px;font:12px var(--sans);color:#d23b3b}
+.nothing{font:italic 1.375rem "Newsreader",Georgia,"Times New Roman",serif;color:#8c8880}
+#warn,#audio-status{position:absolute;bottom:4px;font:12px "Helvetica Neue",Helvetica,Arial,sans-serif;color:#d23b3b}
+#warn{right:8px}
+#audio-status{left:8px;right:8px;color:#8c8880;pointer-events:none}
+#audio-status.error{color:#d23b3b}
 @media(max-width:600px){
   #detail{overflow:auto}
   #cols{flex-wrap:wrap;flex:none}
-  #image{flex-basis:100%;height:calc(240 * var(--unit))}
-  .col{flex-basis:calc(50% - 24 * var(--unit));overflow:visible}
+  #image{flex-basis:100%;width:100%;height:15rem;margin-bottom:1.5rem}
+  .col{flex:0 0 auto;width:calc(50% - 1.5rem);margin-left:0;overflow:visible}
+  #feel{margin-left:3rem}
 }
 </style>
 </head>
@@ -50,8 +54,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
     <div id="cols"><div id="image"><canvas id="cv" width="10" height="10" role="img" aria-label="Detected object outlines"></canvas></div>
       <section class="col" id="see" aria-label="What you see"></section><section class="col" id="feel" aria-label="What you feel"></section></div></div>
   <div id="warn"></div>
+  <div id="audio-status" role="status" aria-live="polite"></div>
 </main>
-<audio id="narr" preload="auto"></audio>
 <script src="data.js"></script>
 <script>
 (function(){
@@ -90,7 +94,7 @@ function buildHoles(){
 }
 function layout(){
   var top=$("top"),W=top.clientWidth,H=top.clientHeight,k=.9*Math.min(W/CONFIG.lidSize[0],H/CONFIG.lidSize[1]),i,p;
-  document.documentElement.style.setProperty("--unit",Math.max(.6,Math.min(window.innerWidth/1366,window.innerHeight/1024))+"px");
+  document.documentElement.style.fontSize=16*Math.max(.6,Math.min(window.innerWidth/1366,window.innerHeight/1024))+"px";
   var lid=$("lid");lid.style.width=CONFIG.lidSize[0]*k+"px";lid.style.height=CONFIG.lidSize[1]*k+"px";
   lid.style.left=(W-CONFIG.lidSize[0]*k)/2+"px";lid.style.top=(H-CONFIG.lidSize[1]*k)/2+"px";
   for(i=0;i<CONFIG.order.length;i++){
@@ -174,9 +178,11 @@ function unlock(){
     var len=Math.floor(ctx.sampleRate*1.1),buf=ctx.createBuffer(2,len,ctx.sampleRate),ch,d,i;
     for(ch=0;ch<2;ch++){d=buf.getChannelData(ch);for(i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
     rev=ctx.createConvolver();rev.buffer=buf;rev.connect(master);
-    var b=ctx.createBuffer(1,1,22050),s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);st(s,0); // iOS unlock
+    var b=ctx.createBuffer(1,1,ctx.sampleRate),s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);st(s,0); // iOS unlock
   }
-  if(ctx.resume)ctx.resume();
+  if(ctx.resume){
+    var p=ctx.resume();if(p&&p.catch)p.catch(function(){audioStatus("Audio is blocked. Tap an opening to try again.",true)});
+  }
 }
 function duck(on){if(ctx&&master)ramp(master.gain,on?.28:.8,ctx.currentTime,.4)}
 function startScene(sc){
@@ -217,14 +223,47 @@ function startScene(sc){
 }
 
 /* ---------- narration (narration/NUMBER.mp3) ---------- */
-var narr=$("narr");
-narr.addEventListener("playing",function(){duck(true)},false);
-narr.addEventListener("ended",function(){duck(false)},false);
-narr.addEventListener("pause",function(){duck(false)},false);
-narr.addEventListener("error",function(){duck(false)},false);
+var narrSource=null,narrRequest=null,narrVersion=0,narrBuffer=null,narrBufferId=null;
+function audioStatus(message,error){
+  $("audio-status").textContent=message;$("audio-status").className=error?"error":"";
+}
+function stopNarration(){
+  narrVersion++;
+  if(narrRequest){var request=narrRequest;narrRequest=null;request.abort()}
+  if(narrSource){var source=narrSource;narrSource=null;source.onended=null;sp(source,0);source.disconnect()}
+  duck(false);audioStatus("",false);
+}
 function narrate(id){
-  var p;narr.pause();narr.src=CONFIG.narrationDir+id+CONFIG.narrationExt;
-  p=narr.play();if(p&&p.catch)p.catch(function(){});
+  stopNarration();
+  if(!ctx){audioStatus("This browser cannot play the exhibition audio.",true);return}
+  var version=narrVersion,request;
+  function fail(message){
+    if(version!==narrVersion)return;
+    narrRequest=null;duck(false);audioStatus(message+" Tap the opening to retry.",true);
+  }
+  function play(buffer){
+    if(version!==narrVersion||selected!==id)return;
+    narrBuffer=buffer;narrBufferId=id;
+    var source=ctx.createBufferSource();source.buffer=buffer;source.connect(ctx.destination);
+    source.onended=function(){
+      source.disconnect();if(narrSource===source){narrSource=null;duck(false)}
+    };
+    narrSource=source;st(source,0);duck(true);audioStatus("",false);
+  }
+  if(narrBufferId===id){play(narrBuffer);return}
+  audioStatus("Loading narration "+id+"…",false);
+  request=new XMLHttpRequest();narrRequest=request;
+  request.open("GET",CONFIG.narrationDir+id+CONFIG.narrationExt,true);
+  request.responseType="arraybuffer";request.timeout=30000;
+  request.onload=function(){
+    if(version!==narrVersion)return;
+    narrRequest=null;
+    if(request.status<200||request.status>=300){fail("Narration unavailable (HTTP "+request.status+").");return}
+    ctx.decodeAudioData(request.response,play,function(){fail("The narration could not be decoded.")});
+  };
+  request.onerror=function(){fail("The narration could not be downloaded.")};
+  request.ontimeout=function(){fail("The narration download timed out.")};
+  request.send();
 }
 
 /* ---------- selecting, idle reset ---------- */
@@ -234,16 +273,15 @@ function mark(id){
 }
 function select(id){
   var it=item(id),sc;
-  resetIdle();unlock();selected=id;mark(id);
+  resetIdle();selected=id;mark(id);unlock();narrate(id);
   $("idle").style.display="none";$("detail").style.display="flex";
   $("num").textContent=id;
   fillText(it);drawFrames(it);
   if(scene){scene.stop();scene=null}
   if(ctx){sc={emo:it?it.emo:null,objs:it&&it.objs?it.objs:[]};scene=startScene(sc)}
-  narrate(id);
 }
 function toIdle(){
-  selected=null;mark(null);narr.pause();if(scene){scene.stop();scene=null}
+  selected=null;mark(null);stopNarration();if(scene){scene.stop();scene=null}
   $("detail").style.display="none";$("idle").style.display="flex";
 }
 function resetIdle(){clearTimeout(idleT);idleT=setTimeout(toIdle,CONFIG.idleSeconds*1000)}
