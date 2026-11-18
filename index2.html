@@ -184,7 +184,7 @@ function play(id){
   stopPlayback();token=playToken;
   if(!player){ // one element for the whole page, so the first tap unlocks audio for later async plays
     player=new Audio();
-    player.addEventListener("ended",function(){audioStatus("",false)},false);
+    player.addEventListener("ended",function(){if(selected)toIdle()},false); // soundtrack finished: back to the start screen
   }
   function fail(message){
     if(token!==playToken)return;
@@ -218,7 +218,7 @@ function select(id){
   fillText(it);drawFrames(it);
 }
 function toIdle(){
-  selected=null;mark(null);stopPlayback();
+  clearTimeout(idleT);selected=null;mark(null);stopPlayback();
   $("detail").style.display="none";$("idle").style.display="flex";
 }
 function resetIdle(){clearTimeout(idleT);idleT=setTimeout(toIdle,CONFIG.idleSeconds*1000)}
