@@ -3,6 +3,7 @@
 !/.nojekyll
 !/index.html
 !/index2.html
+!/index-poetic.html
 !/data.js
 !/Newsreader.ttf
 !/Newsreader-OFL.txt
@@ -17,3 +18,6 @@
 !/narration/3908.mp3
 !/narration/3932.mp3
 !/narration/mix-*.mp3
+!/narration-poetic/
+/narration-poetic/*
+!/narration-poetic/mix-*.mp3

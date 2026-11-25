@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Prescriptive Art [Model ZOO]</title>
+<style>
+@font-face{font-family:"Newsreader";src:url("Newsreader.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#070707;color:#edeae4;font-family:"Newsreader",Georgia,"Times New Roman",serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;touch-action:manipulation}
+#top{position:absolute;left:0;top:0;right:0;height:48.14453125%;overflow:hidden}
+#lid{position:absolute;background:#030303;border-radius:4px}
+.hole{position:absolute;padding:0;border:1.5px solid #b8b4ac;border-radius:50%;background:#292928;cursor:pointer}
+.hole.on{border:3px solid #f0935a;background:rgba(240,147,90,.13)}
+.hole:focus-visible{outline:2px solid #edeae4;outline-offset:6px}
+.lab{position:absolute;text-align:center;font-weight:400;color:#dedbd5;pointer-events:none}
+.lab.on{color:#f0935a}
+#bottom{position:absolute;left:0;right:0;top:48.14453125%;bottom:0;background:#0f0f0e;box-shadow:inset 0 1px #2a2a28}
+#idle{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;font:italic 1.625rem "Newsreader",Georgia,"Times New Roman",serif;color:#dedbd5;text-align:center;padding:0 40px}
+#detail{position:absolute;top:0;right:0;bottom:0;left:0;display:none;flex-direction:column;padding:2rem 3rem 3rem}
+#num{margin:0 0 1.5rem;font:400 2rem/1 "Newsreader",Georgia,"Times New Roman",serif}
+#cols{display:flex;flex:1;min-height:0;width:100%}
+#image{flex:0 0 auto;width:22.5rem;min-width:0;overflow:hidden;background:#000;border:1px solid #2a2a28;border-radius:4px}
+#cv{display:block;width:100%;height:100%}
+.col{flex:1;min-width:0;width:0;overflow:auto;margin-left:3rem}
+.col h2{margin:0 0 1rem;font:400 1.25rem/1 "Newsreader",Georgia,"Times New Roman",serif;color:#f0935a}
+.row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;box-shadow:inset 0 -1px #2a2a28;font-size:2rem;line-height:1}
+.row+.row{margin-top:1rem}
+.row span:first-child{min-width:0;word-wrap:break-word;overflow-wrap:break-word}
+.row span:last-child{font-size:1.25rem;white-space:nowrap;flex-shrink:0;margin-left:.75rem}
+.nm{text-transform:capitalize}
+.nothing{font:italic 1.375rem "Newsreader",Georgia,"Times New Roman",serif;color:#8c8880}
+#warn,#audio-status{position:absolute;bottom:4px;font:12px "Helvetica Neue",Helvetica,Arial,sans-serif;color:#d23b3b}
+#warn{right:8px}
+#audio-status{left:8px;right:8px;color:#8c8880;pointer-events:none}
+#audio-status.error{color:#d23b3b}
+@media(max-width:600px){
+  #detail{overflow:auto}
+  #cols{flex-wrap:wrap;flex:none}
+  #image{flex-basis:100%;width:100%;height:15rem;margin-bottom:1.5rem}
+  .col{flex:0 0 auto;width:calc(50% - 1.5rem);margin-left:0;overflow:visible}
+  #feel{margin-left:3rem}
+}
+</style>
+</head>
+<body>
+<nav id="top" aria-label="Select an opening"><div id="lid"></div></nav>
+<main id="bottom">
+  <div id="idle">Tap an opening, listen and lean over</div>
+  <div id="detail"><h1 id="num"></h1>
+    <div id="cols"><div id="image"><canvas id="cv" width="10" height="10" role="img" aria-label="Detected object outlines"></canvas></div>
+      <section class="col" id="see" aria-label="What you see"></section><section class="col" id="feel" aria-label="What you feel"></section></div></div>
+  <div id="warn"></div>
+  <div id="audio-status" role="status" aria-live="polite"></div>
+</main>
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+/* ---------- settings you may change ---------- */
+var CONFIG={
+  order:["3694","3767","3751","3858","3932","3616","3759","3908"],
+  // Saved box model: 50% prints, 2 cm panels, 1.5 cm lid, prints on the back panel.
+  lidSize:[100,80],
+  // Opening centre X, centre Y and model diameter in cm, from the lid's top-left.
+  openings:[[17,17,12],[42.625,17,15],[75.625,17,15],
+    [24.375,40,15],[57.375,40,15],[83,40,12],[40.875,63,15],[66.5,63,12]],
+  narrationDir:"narration-poetic/", mixPrefix:"mix-", mixVersion:"1", narrationExt:".mp3",
+  idleSeconds:120                           // back to the start screen after this many seconds without a tap
+};
+var EMO=["amusement","awe","contentment","excitement","anger","disgust","fear","sadness"];
+var D=window.KIOSK||{items:[]};
+function $(id){return document.getElementById(id)}
+function item(id){for(var i=0;i<D.items.length;i++){if(D.items[i].id===id)return D.items[i]}return null}
+function pct(v){return Math.round(v*100)+"%"}
+function range(lo,hi){var a=Math.round(lo*100),b=Math.round(hi*100);return a===b?b+"%":a+"–"+b+"%"}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function hash(s){var h=5381,i;for(i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0}return h}
+
+/* ---------- selector ---------- */
+var holes=[],labs=[],selected=null;
+function buildHoles(){
+  var lid=$("lid"),i,h,l;
+  for(i=0;i<CONFIG.order.length;i++){
+    h=document.createElement("button");h.type="button";h.className="hole";h.setAttribute("data-id",CONFIG.order[i]);
+    h.setAttribute("aria-label","Opening "+CONFIG.order[i]);h.setAttribute("aria-pressed","false");
+    l=document.createElement("div");l.className="lab";l.appendChild(document.createTextNode(CONFIG.order[i]));
+    lid.appendChild(h);lid.appendChild(l);holes.push(h);labs.push(l);
+    (function(id){h.addEventListener("click",function(){select(id)},false)})(CONFIG.order[i]);
+  }
+}
+function layout(){
+  var top=$("top"),W=top.clientWidth,H=top.clientHeight,k=.9*Math.min(W/CONFIG.lidSize[0],H/CONFIG.lidSize[1]),i,p;
+  document.documentElement.style.fontSize=16*Math.max(.6,Math.min(window.innerWidth/1366,window.innerHeight/1024))+"px";
+  var lid=$("lid");lid.style.width=CONFIG.lidSize[0]*k+"px";lid.style.height=CONFIG.lidSize[1]*k+"px";
+  lid.style.left=(W-CONFIG.lidSize[0]*k)/2+"px";lid.style.top=(H-CONFIG.lidSize[1]*k)/2+"px";
+  for(i=0;i<CONFIG.order.length;i++){
+    p=CONFIG.openings[i];
+    holes[i].style.width=holes[i].style.height=p[2]*k+"px";
+    holes[i].style.left=(p[0]-p[2]/2)*k+"px";holes[i].style.top=(p[1]-p[2]/2)*k+"px";
+    labs[i].style.width=12*k+"px";labs[i].style.left=(p[0]-6)*k+"px";
+    labs[i].style.top=(p[1]+p[2]/2+1)*k+"px";labs[i].style.fontSize=Math.max(10,2*k)+"px";
+    labs[i].style.letterSpacing=.1*k+"px";
+  }
+}
+
+/* ---------- bottom half: frames, what you see, what you feel ---------- */
+function drawFrames(it){
+  var c=$("cv"),g=c.getContext("2d"),frame=$("image");
+  c.width=frame.clientWidth;c.height=frame.clientHeight;
+  g.fillStyle="#000";g.fillRect(0,0,c.width,c.height);
+  if(!it||!it.boxes)return;
+  var k=Math.min(c.width/it.w,c.height/it.h),ox=(c.width-it.w*k)/2,oy=(c.height-it.h*k)/2;
+  var fs=Math.max(11,Math.round(c.height/22)),i,b,col,label,tw,ty;
+  g.translate(ox,oy);
+  g.lineWidth=2;g.font="600 "+fs+"px Helvetica, Arial, sans-serif";g.textBaseline="top";
+  for(i=0;i<it.boxes.length;i++){
+    b=it.boxes[i];col="hsl("+(hash(b.name)%360)+",85%,58%)";label=b.name+" "+pct(b.conf);
+    g.strokeStyle=col;g.strokeRect(b.x*k,b.y*k,b.w*k,b.h*k);
+    tw=g.measureText(label).width+8;ty=Math.max(0,b.y*k-fs-4);
+    g.fillStyle=col;g.fillRect(b.x*k,ty,tw,fs+4);g.fillStyle="#000";g.fillText(label,b.x*k+4,ty+2);
+  }
+}
+function fillText(it){
+  var see="",feel="",i,o,e,rows=[];
+  if(it&&it.objs&&it.objs.length){
+    for(i=0;i<it.objs.length;i++){o=it.objs[i];
+      see+='<div class="row"><span class="nm">'+esc(o.name)+(o.n>1?" ×"+o.n:"")+"</span><span>"+range(o.lo,o.hi)+"</span></div>"}
+  }else see='<div class="nothing">Nothing</div>';
+  if(it&&it.emo){
+    for(i=0;i<EMO.length;i++){rows.push({l:EMO[i],v:it.emo.p[i]||0})}
+    rows.sort(function(a,b){return b.v-a.v});
+    feel='<div class="row"><span class="nm">'+esc(it.emo.top)+'</span><span>'+pct(it.emo.conf)+"</span></div>";
+    for(i=0;i<rows.length&&i<5;i++){
+      if(rows[i].l===it.emo.top||rows[i].v<0.05)continue;
+      feel+='<div class="row"><span class="nm">'+rows[i].l+"</span><span>"+pct(rows[i].v)+"</span></div>";
+    }
+  }else feel='<div class="nothing">Nothing</div>';
+  $("see").innerHTML="<h2>What you see</h2>"+see;$("feel").innerHTML="<h2>What you feel</h2>"+feel;
+}
+
+/* ---------- playback of pre-rendered files (narration/mix-NUMBER.mp3: soundtrack + narration) ---------- */
+var idleT=0,player=null,playUrls={},playRequest=null,playToken=0,directFails=false;
+function audioStatus(message,error){
+  $("audio-status").textContent=message;$("audio-status").className=error?"error":"";
+}
+function mixUrl(id){return CONFIG.narrationDir+CONFIG.mixPrefix+id+CONFIG.narrationExt+"?v="+CONFIG.mixVersion}
+function stopPlayback(){
+  playToken++;
+  if(playRequest){var request=playRequest;playRequest=null;request.abort()}
+  if(player){player.pause()}
+  audioStatus("",false);
+}
+// Downloads a file and wraps it as audio/mpeg: GitHub Pages labels MP3 as audio/mp3, which iOS 9 can refuse to play directly.
+function fetchMix(id,done,fail){
+  var request=new XMLHttpRequest();
+  request.open("GET",mixUrl(id),true);request.responseType="arraybuffer";request.timeout=60000;
+  request.onload=function(){
+    if(request.status<200||request.status>=300||!window.URL||!URL.createObjectURL){fail("HTTP "+request.status);return}
+    playUrls[id]=URL.createObjectURL(new Blob([request.response],{type:"audio/mpeg"}));done(playUrls[id]);
+  };
+  request.onerror=function(){fail("download failed")};
+  request.ontimeout=function(){fail("download timed out")};
+  playRequest=request;request.send();
+}
+function prefetch(i){
+  var request;
+  if(i>=CONFIG.order.length||!directFails)return;
+  if(playUrls[CONFIG.order[i]]){prefetch(i+1);return}
+  request=new XMLHttpRequest();request.open("GET",mixUrl(CONFIG.order[i]),true);request.responseType="arraybuffer";
+  request.onload=function(){
+    if(request.status>=200&&request.status<300&&!playUrls[CONFIG.order[i]]&&window.URL&&URL.createObjectURL)
+      playUrls[CONFIG.order[i]]=URL.createObjectURL(new Blob([request.response],{type:"audio/mpeg"}));
+    prefetch(i+1);
+  };
+  request.onerror=function(){setTimeout(function(){prefetch(i)},5000)};
+  request.send();
+}
+function play(id){
+  var token,failed;
+  stopPlayback();token=playToken;
+  if(!player){ // one element for the whole page, so the first tap unlocks audio for later async plays
+    player=new Audio();
+    player.addEventListener("ended",function(){if(selected)toIdle()},false); // soundtrack finished: back to the start screen
+  }
+  function fail(message){
+    if(token!==playToken)return;
+    playRequest=null;audioStatus("Audio unavailable ("+message+"). Tap the opening to retry.",true);
+  }
+  function startBlob(url){
+    if(token!==playToken)return;
+    playRequest=null;player.onerror=function(){fail("playback error "+(player.error?player.error.code:"?"))};
+    player.src=url;player.play();audioStatus("",false);prefetch(0);
+  }
+  if(playUrls[id]){startBlob(playUrls[id]);return}
+  player.onerror=null;
+  if(directFails){audioStatus("Loading audio…",false);fetchMix(id,startBlob,fail);return}
+  player.onerror=function(){
+    if(token!==playToken)return;
+    directFails=true;audioStatus("Loading audio…",false);fetchMix(id,startBlob,fail);
+  };
+  player.src=mixUrl(id);player.play();
+}
+
+/* ---------- selecting, idle reset ---------- */
+function mark(id){
+  var i;for(i=0;i<CONFIG.order.length;i++){
+    var on=CONFIG.order[i]===id;holes[i].className="hole"+(on?" on":"");holes[i].setAttribute("aria-pressed",on?"true":"false");labs[i].className="lab"+(on?" on":"")}
+}
+function select(id){
+  var it=item(id);
+  resetIdle();selected=id;mark(id);play(id);
+  $("idle").style.display="none";$("detail").style.display="flex";
+  $("num").textContent=id;
+  fillText(it);drawFrames(it);
+}
+function toIdle(){
+  clearTimeout(idleT);selected=null;mark(null);stopPlayback();
+  $("detail").style.display="none";$("idle").style.display="flex";
+}
+function resetIdle(){clearTimeout(idleT);idleT=setTimeout(toIdle,CONFIG.idleSeconds*1000)}
+document.addEventListener("touchstart",function(){if(selected)resetIdle()},false);
+document.addEventListener("touchmove",function(e){e.preventDefault()},false);
+function relayout(){layout();if(selected){var it=item(selected);drawFrames(it)}}
+window.addEventListener("resize",relayout,false);window.addEventListener("orientationchange",function(){setTimeout(relayout,300)},false);
+buildHoles();layout();
+if(!D.items.length)$("warn").innerHTML="data.js not found or empty";
+else if(D.sample)$("warn").innerHTML="SAMPLE DATA";
+})();
+</script>
+</body>
+</html>
